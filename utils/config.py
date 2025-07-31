@@ -8,7 +8,7 @@ from typing import Dict, List
 
 class Config:
     # Telegram Bot Configuration
-    TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE')
+    TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8045125371:AAHyV8-uE9QL6MCPy1pQv_l8rkU2OM90lEU')
     
     # API Keys for Market Data
     ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY', 'demo')
