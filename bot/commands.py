@@ -57,6 +57,27 @@ class BotCommands:
         except Exception as e:
             logging.error(f"Error generating signal with timeframe: {e}")
             return None
+
+    async def generate_signal_with_timeframe_and_pair(self, expiration_minutes=None, pair=None):
+        """Generate a new trading signal with specific timeframe and pair"""
+        try:
+            # Get available currency pairs
+            pairs = self.currency_pairs.get_active_pairs()
+            if not pairs:
+                return None
+                
+            # Generate signal using AI with specific timeframe and pair
+            signal = await self.signal_generator.generate_signal_with_timeframe(expiration_minutes, pair)
+            
+            # Store signal in history
+            if signal:
+                self.signal_history.add_signal(signal)
+                
+            return signal
+            
+        except Exception as e:
+            logging.error(f"Error generating signal with timeframe and pair: {e}")
+            return None
     
     async def get_currency_pairs(self):
         """Get formatted currency pairs information"""

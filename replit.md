@@ -31,9 +31,10 @@ Preferred communication style: Simple, everyday language.
 ## Key Components
 
 ### 1. Telegram Bot (`bot/`)
-- **TradingBot**: Main bot class handling user interactions
-- **BotCommands**: Command processing and response generation
-- **Features**: Signal generation, subscription management, pair listings, statistics
+- **TradingBot**: Main bot class handling user interactions with enhanced UI
+- **BotCommands**: Command processing and response generation with pair selection
+- **Features**: Timeframe selection (1m-4h), currency pair selection, signal generation, subscription management, statistics
+- **User Flow**: /signal → timeframe selection → currency pair selection → customized signal
 
 ### 2. AI Engine (`ai/`)
 - **SignalGenerator**: Orchestrates market analysis and ML predictions
@@ -62,10 +63,12 @@ Preferred communication style: Simple, everyday language.
 ## Data Flow
 
 1. **Signal Generation Flow**:
-   - Market data fetched from external APIs
-   - Technical analysis performed on price data
-   - ML models predict price direction
-   - Signal created with confidence scoring
+   - User selects timeframe (1m, 5m, 15m, 30m, 1h, 4h) via Telegram interface
+   - User selects currency pair from 12 major/cross pairs or lets AI auto-select
+   - Market data fetched from external APIs for selected pair
+   - Technical analysis performed with timeframe-specific strategies
+   - ML models predict price direction with specialized features
+   - Signal created with confidence scoring and timeframe-optimized analysis
    - Signal distributed via Telegram and stored in history
 
 2. **User Interaction Flow**:

@@ -166,6 +166,8 @@ Select your preferred expiration time for the trading signal:
 📊 **Long Term:** 1-4 hours (Trend following)
 
 **Quick Signal** uses AI to select optimal timeframe automatically.
+
+After selecting timeframe, you can choose your preferred currency pair.
             """
             
             await update.message.reply_text(
@@ -256,9 +258,16 @@ Use /unsubscribe to stop auto signals anytime.
             )
             
         elif query.data.startswith("signal_"):
-            # Handle timeframe-specific signal generation
+            # Store timeframe and show pair selection
             timeframe = query.data.replace("signal_", "")
-            await self.generate_signal_with_timeframe(query, context, timeframe)
+            context.user_data['selected_timeframe'] = timeframe
+            await self._show_pair_selection(query, context)
+            
+        elif query.data.startswith("pair_"):
+            # Handle pair selection and generate signal
+            pair = query.data.replace("pair_", "").replace("_", "/")
+            timeframe = context.user_data.get('selected_timeframe', 'auto')
+            await self.generate_signal_with_timeframe_and_pair(query, context, timeframe, pair)
                 
         elif query.data == "subscribe":
             user_id = query.from_user.id
@@ -290,8 +299,91 @@ Use /unsubscribe to stop auto signals anytime.
                 "🤖 I'm an AI trading bot! Use /help to see what I can do for you."
             )
 
+    async def _show_pair_selection(self, query, context):
+        """Show currency pair selection options"""
+        try:
+            # Create keyboard with popular currency pairs
+            keyboard = [
+                [
+                    InlineKeyboardButton("EUR/USD", callback_data="pair_EUR_USD"),
+                    InlineKeyboardButton("GBP/USD", callback_data="pair_GBP_USD"),
+                    InlineKeyboardButton("USD/JPY", callback_data="pair_USD_JPY")
+                ],
+                [
+                    InlineKeyboardButton("AUD/USD", callback_data="pair_AUD_USD"),
+                    InlineKeyboardButton("EUR/GBP", callback_data="pair_EUR_GBP"),
+                    InlineKeyboardButton("EUR/JPY", callback_data="pair_EUR_JPY")
+                ],
+                [
+                    InlineKeyboardButton("GBP/JPY", callback_data="pair_GBP_JPY"),
+                    InlineKeyboardButton("USD/CHF", callback_data="pair_USD_CHF"),
+                    InlineKeyboardButton("NZD/USD", callback_data="pair_NZD_USD")
+                ],
+                [
+                    InlineKeyboardButton("EUR/CHF", callback_data="pair_EUR_CHF"),
+                    InlineKeyboardButton("AUD/JPY", callback_data="pair_AUD_JPY"),
+                    InlineKeyboardButton("CAD/JPY", callback_data="pair_CAD_JPY")
+                ],
+                [InlineKeyboardButton("🎲 Auto Select (AI Chooses)", callback_data="pair_AUTO")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            timeframe = context.user_data.get('selected_timeframe', 'auto')
+            timeframe_display = {"1m": "1 minute", "5m": "5 minutes", "15m": "15 minutes", 
+                               "30m": "30 minutes", "1h": "1 hour", "4h": "4 hours", "auto": "Auto"}.get(timeframe, timeframe)
+            
+            message = f"""
+💱 **Choose Currency Pair**
+
+Selected timeframe: **{timeframe_display}**
+
+Select your preferred currency pair for the trading signal:
+
+🌟 **Major Pairs:** EUR/USD, GBP/USD, USD/JPY
+📈 **Cross Pairs:** EUR/GBP, GBP/JPY, EUR/JPY  
+⚡ **Volatile Pairs:** AUD/JPY, GBP/JPY, EUR/CHF
+
+Let AI auto-select the most optimal pair based on current market conditions.
+            """
+            
+            await query.edit_message_text(
+                message,
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            )
+            
+        except Exception as e:
+            logging.error(f"Error showing pair selection: {e}")
+            await query.edit_message_text("❌ Error showing pair options. Please try again.")
+
+    async def generate_signal_with_timeframe_and_pair(self, query, context, timeframe, pair):
+        """Generate signal with specific timeframe and pair"""
+        try:
+            await context.bot.send_chat_action(chat_id=query.message.chat_id, action="typing")
+            
+            # Map timeframe codes to minutes
+            timeframe_map = {
+                "1m": 1, "5m": 5, "15m": 15, "30m": 30,
+                "1h": 60, "4h": 240, "auto": None
+            }
+            
+            expiration_minutes = timeframe_map.get(timeframe, None)
+            selected_pair = None if pair == "AUTO" else pair
+            
+            # Generate signal with specific timeframe and pair
+            signal = await self.commands.generate_signal_with_timeframe_and_pair(expiration_minutes, selected_pair)
+            
+            if signal:
+                await self.send_formatted_signal(query.message.chat_id, signal, context)
+            else:
+                await query.edit_message_text("❌ Unable to generate signal at this time. Please try again later.")
+                
+        except Exception as e:
+            logging.error(f"Error generating signal with timeframe {timeframe} and pair {pair}: {e}")
+            await query.edit_message_text("❌ Error generating signal. Please try again later.")
+
     async def generate_signal_with_timeframe(self, query, context, timeframe):
-        """Generate signal with specific timeframe"""
+        """Generate signal with specific timeframe (legacy method)"""
         try:
             await context.bot.send_chat_action(chat_id=query.message.chat_id, action="typing")
             

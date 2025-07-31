@@ -33,8 +33,25 @@
       "actual_result": null,
       "profit_loss": null,
       "closed_at": null
+    },
+    {
+      "signal_id": "USD/JPY_1753943865",
+      "pair": "USD/JPY",
+      "direction": "CALL",
+      "entry_price": 149.01049062498385,
+      "current_price": 149,
+      "expiration_minutes": 1,
+      "confidence": 85.7,
+      "risk_level": "LOW",
+      "analysis": "Short-term 1min scalping opportunity. Stable momentum for precise entry. Consolidation breakout pattern forming. Momentum indicators show bullish acceleration. AI confidence: 85.7%",
+      "timestamp": "2025-07-31 06:37:45 UTC",
+      "model_type": "medium_term",
+      "outcome": null,
+      "actual_result": null,
+      "profit_loss": null,
+      "closed_at": null
     }
   ],
-  "last_updated": "2025-07-31T06:28:44.809846",
-  "total_count": 2
+  "last_updated": "2025-07-31T06:37:45.822738",
+  "total_count": 3
 }
