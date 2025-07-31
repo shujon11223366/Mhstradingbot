@@ -1,0 +1,8 @@
+Enhance signal appearance to highlight buy/sell actions and risk levels
+
+Implement color-coded BUY/SELL actions with animations in telegram_bot.py and update static/style.css for enhanced signal display.
+
+Replit-Commit-Author: Agent
+Replit-Commit-Session-Id: f015b9d2-3038-4e53-a360-deee25bd4e1c
+Replit-Commit-Checkpoint-Type: full_checkpoint
+Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/489062c7-9975-4035-945d-d7089ff42afe/f015b9d2-3038-4e53-a360-deee25bd4e1c/2H0ku4w
