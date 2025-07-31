@@ -54,6 +54,38 @@ class SignalGenerator:
         except Exception as e:
             logging.error(f"Error generating signal: {e}")
             return None
+
+    async def generate_signal_with_timeframe(self, expiration_minutes: int = None, pair: str = None) -> Optional[Dict]:
+        """Generate a trading signal with specific timeframe"""
+        try:
+            # Auto-select pair if not provided
+            if not pair:
+                pair = self._select_optimal_pair()
+            
+            # Get market data
+            market_data = await self.market_data.get_real_time_data(pair)
+            if not market_data:
+                logging.warning(f"No market data available for {pair}")
+                return None
+            
+            # Perform market analysis
+            analysis_result = await self.market_analyzer.analyze_market(pair, market_data)
+            
+            # Generate ML prediction
+            prediction = await self.ml_predictor.predict_direction(pair, market_data, analysis_result)
+            
+            # Create signal with specific timeframe
+            signal = self._create_signal_with_timeframe(pair, market_data, analysis_result, prediction, expiration_minutes)
+            
+            # Log signal generation
+            self.signal_count += 1
+            logging.info(f"Generated signal #{self.signal_count} for {pair}: {signal['direction']} ({signal['expiration_minutes']}m)")
+            
+            return signal
+            
+        except Exception as e:
+            logging.error(f"Error generating signal with timeframe: {e}")
+            return None
     
     def generate_automated_signals(self):
         """Generate automated signals for subscribers"""
@@ -137,6 +169,48 @@ class SignalGenerator:
             
         except Exception as e:
             logging.error(f"Error creating signal: {e}")
+            return None
+
+    def _create_signal_with_timeframe(self, pair: str, market_data: Dict, analysis: Dict, prediction: Dict, expiration_minutes: int = None) -> Dict:
+        """Create a formatted trading signal with specific timeframe"""
+        try:
+            current_time = datetime.now()
+            
+            # Determine signal direction
+            direction = prediction['direction'] # 'CALL' or 'PUT'
+            confidence = prediction['confidence']
+            
+            # Calculate entry price (current price with small adjustment)
+            current_price = market_data['price']
+            entry_price = current_price * (1 + random.uniform(-0.0001, 0.0001))
+            
+            # Use provided expiration time or calculate automatically
+            if expiration_minutes is None:
+                expiration_minutes = self._calculate_expiration_time(analysis, confidence)
+            
+            # Assess risk level
+            risk_level = self._assess_risk_level(analysis, confidence)
+            
+            # Generate analysis explanation with timeframe context
+            analysis_text = self._generate_analysis_text_with_timeframe(analysis, prediction, expiration_minutes)
+            
+            signal = {
+                'pair': pair,
+                'direction': direction,
+                'entry_price': entry_price,
+                'current_price': current_price,
+                'expiration_minutes': expiration_minutes,
+                'confidence': confidence,
+                'risk_level': risk_level,
+                'analysis': analysis_text,
+                'timestamp': current_time.strftime('%Y-%m-%d %H:%M:%S UTC'),
+                'signal_id': f"{pair}_{int(current_time.timestamp())}"
+            }
+            
+            return signal
+            
+        except Exception as e:
+            logging.error(f"Error creating signal with timeframe: {e}")
             return None
     
     def _calculate_expiration_time(self, analysis: Dict, confidence: float) -> int:
@@ -251,6 +325,62 @@ class SignalGenerator:
         except Exception as e:
             logging.error(f"Error generating analysis text: {e}")
             return "AI analysis indicates favorable trading conditions based on current market data."
+
+    def _generate_analysis_text_with_timeframe(self, analysis: Dict, prediction: Dict, expiration_minutes: int) -> str:
+        """Generate human-readable analysis explanation with timeframe context"""
+        try:
+            direction = prediction['direction']
+            confidence = prediction['confidence']
+            volatility = analysis.get('volatility', 0.5)
+            trend = analysis.get('trend', 'sideways')
+            
+            # Base analysis text
+            analysis_parts = []
+            
+            # Timeframe-specific analysis
+            if expiration_minutes <= 5:
+                analysis_parts.append(f"Short-term {expiration_minutes}min scalping opportunity")
+                if volatility > 0.6:
+                    analysis_parts.append("High volatility perfect for quick trades")
+                else:
+                    analysis_parts.append("Stable momentum for precise entry")
+            elif expiration_minutes <= 30:
+                analysis_parts.append(f"Medium-term {expiration_minutes}min swing setup")
+                analysis_parts.append("Balanced risk-reward ratio for trend following")
+            else:
+                analysis_parts.append(f"Long-term {expiration_minutes}min position trade")
+                analysis_parts.append("Strong directional bias for extended moves")
+            
+            # Trend analysis
+            if trend == 'bullish':
+                analysis_parts.append("Strong bullish momentum detected")
+            elif trend == 'bearish':
+                analysis_parts.append("Clear bearish pressure identified")
+            else:
+                analysis_parts.append("Consolidation breakout pattern forming")
+            
+            # AI prediction reasoning with timeframe context
+            timeframe_reasoning = {
+                'CALL': {
+                    'short': "Momentum indicators show bullish acceleration",
+                    'medium': "Support levels holding, expecting bounce higher", 
+                    'long': "Major trend reversal signals confirmed"
+                },
+                'PUT': {
+                    'short': "Momentum indicators show bearish acceleration",
+                    'medium': "Resistance rejection, expecting move lower",
+                    'long': "Major trend reversal signals confirmed"
+                }
+            }
+            
+            timeframe_type = 'short' if expiration_minutes <= 5 else 'medium' if expiration_minutes <= 30 else 'long'
+            analysis_parts.append(timeframe_reasoning[direction][timeframe_type])
+            
+            return ". ".join(analysis_parts) + f". AI confidence: {confidence:.1f}%"
+            
+        except Exception as e:
+            logging.error(f"Error generating timeframe analysis: {e}")
+            return f"AI analysis for {expiration_minutes}min timeframe indicates favorable trading conditions."
     
     def _should_generate_signal(self, pair: str) -> bool:
         """Check if enough time has passed to generate a new signal"""

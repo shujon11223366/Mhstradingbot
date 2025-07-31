@@ -138,22 +138,45 @@ Need more help? Contact @trademind_help
         await update.message.reply_text(help_text, parse_mode='Markdown')
 
     async def get_signal_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle /signal command"""
+        """Handle /signal command - show time frame options"""
         try:
-            # Show typing indicator
-            await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+            # Create inline keyboard with time frame options
+            keyboard = [
+                [
+                    InlineKeyboardButton("1 min", callback_data="signal_1m"),
+                    InlineKeyboardButton("5 min", callback_data="signal_5m"),
+                    InlineKeyboardButton("15 min", callback_data="signal_15m")
+                ],
+                [
+                    InlineKeyboardButton("30 min", callback_data="signal_30m"),
+                    InlineKeyboardButton("1 hour", callback_data="signal_1h"),
+                    InlineKeyboardButton("4 hours", callback_data="signal_4h")
+                ],
+                [InlineKeyboardButton("📊 Quick Signal (Auto)", callback_data="signal_auto")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             
-            # Generate signal
-            signal = await self.commands.generate_signal()
+            message = """
+🕒 **Choose Signal Timeframe**
+
+Select your preferred expiration time for the trading signal:
+
+⚡ **Short Term:** 1-5 minutes (High frequency)
+📈 **Medium Term:** 15-30 minutes (Balanced)
+📊 **Long Term:** 1-4 hours (Trend following)
+
+**Quick Signal** uses AI to select optimal timeframe automatically.
+            """
             
-            if signal:
-                await self.send_formatted_signal(update.effective_chat.id, signal, context)
-            else:
-                await update.message.reply_text("❌ Unable to generate signal at this time. Please try again later.")
+            await update.message.reply_text(
+                message, 
+                reply_markup=reply_markup, 
+                parse_mode='Markdown'
+            )
                 
         except Exception as e:
-            logging.error(f"Error generating signal: {e}")
-            await update.message.reply_text("❌ Error generating signal. Please try again later.")
+            logging.error(f"Error showing signal options: {e}")
+            await update.message.reply_text("❌ Error showing signal options. Please try again later.")
 
     async def list_pairs_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /pairs command"""
@@ -207,12 +230,35 @@ Use /unsubscribe to stop auto signals anytime.
         await query.answer()
         
         if query.data == "get_signal":
-            await context.bot.send_chat_action(chat_id=query.message.chat_id, action="typing")
-            signal = await self.commands.generate_signal()
-            if signal:
-                await self.send_formatted_signal(query.message.chat_id, signal, context)
-            else:
-                await query.edit_message_text("❌ Unable to generate signal at this time.")
+            # Show timeframe options
+            keyboard = [
+                [
+                    InlineKeyboardButton("1 min", callback_data="signal_1m"),
+                    InlineKeyboardButton("5 min", callback_data="signal_5m"),
+                    InlineKeyboardButton("15 min", callback_data="signal_15m")
+                ],
+                [
+                    InlineKeyboardButton("30 min", callback_data="signal_30m"),
+                    InlineKeyboardButton("1 hour", callback_data="signal_1h"),
+                    InlineKeyboardButton("4 hours", callback_data="signal_4h")
+                ],
+                [InlineKeyboardButton("📊 Quick Signal (Auto)", callback_data="signal_auto")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.edit_message_text(
+                "🕒 **Choose Signal Timeframe:**\n\n"
+                "⚡ **Short:** 1-5 min (High frequency)\n"
+                "📈 **Medium:** 15-30 min (Balanced)\n"
+                "📊 **Long:** 1-4 hours (Trend following)",
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            )
+            
+        elif query.data.startswith("signal_"):
+            # Handle timeframe-specific signal generation
+            timeframe = query.data.replace("signal_", "")
+            await self.generate_signal_with_timeframe(query, context, timeframe)
                 
         elif query.data == "subscribe":
             user_id = query.from_user.id
@@ -243,6 +289,36 @@ Use /unsubscribe to stop auto signals anytime.
             await update.message.reply_text(
                 "🤖 I'm an AI trading bot! Use /help to see what I can do for you."
             )
+
+    async def generate_signal_with_timeframe(self, query, context, timeframe):
+        """Generate signal with specific timeframe"""
+        try:
+            await context.bot.send_chat_action(chat_id=query.message.chat_id, action="typing")
+            
+            # Map timeframe codes to minutes
+            timeframe_map = {
+                "1m": 1,
+                "5m": 5,
+                "15m": 15,
+                "30m": 30,
+                "1h": 60,
+                "4h": 240,
+                "auto": None  # Let AI choose optimal timeframe
+            }
+            
+            expiration_minutes = timeframe_map.get(timeframe, None)
+            
+            # Generate signal with specific timeframe
+            signal = await self.commands.generate_signal_with_timeframe(expiration_minutes)
+            
+            if signal:
+                await self.send_formatted_signal(query.message.chat_id, signal, context)
+            else:
+                await query.edit_message_text("❌ Unable to generate signal at this time. Please try again later.")
+                
+        except Exception as e:
+            logging.error(f"Error generating signal with timeframe {timeframe}: {e}")
+            await query.edit_message_text("❌ Error generating signal. Please try again later.")
 
     async def send_formatted_signal(self, chat_id, signal, context):
         """Send a beautifully formatted trading signal"""
