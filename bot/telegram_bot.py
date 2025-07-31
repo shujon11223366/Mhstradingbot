@@ -414,42 +414,69 @@ Let AI auto-select the most optimal pair based on current market conditions.
 
     async def send_formatted_signal(self, chat_id, signal, context):
         """Send a beautifully formatted trading signal"""
-        # Convert CALL/PUT to BUY/SELL terminology
+        # Convert CALL/PUT to BUY/SELL terminology with enhanced visuals
         if signal['direction'] == 'CALL':
-            direction_emoji = "🟢"
-            direction_text = f"{direction_emoji} **BUY** (CALL)"
-            action_text = "📈 **Action:** BUY"
+            # Green background effect for BUY
+            action_header = "🟢🟢🟢 **B U Y** 🟢🟢🟢"
+            action_text = "📈 **Action:** 🔥 **BUY** 🔥"
+            direction_banner = "🚀💚 **BULLISH SIGNAL** 💚🚀"
+            action_emoji = "⬆️💹"
         else:
-            direction_emoji = "🔴"
-            direction_text = f"{direction_emoji} **SELL** (PUT)"
-            action_text = "📉 **Action:** SELL"
+            # Red background effect for SELL  
+            action_header = "🔴🔴🔴 **S E L L** 🔴🔴🔴"
+            action_text = "📉 **Action:** 🎯 **SELL** 🎯"
+            direction_banner = "⚡🔻 **BEARISH SIGNAL** 🔻⚡"
+            action_emoji = "⬇️📉"
         
-        # Risk level emoji
-        risk_emoji = {"LOW": "🟢", "MEDIUM": "🟡", "HIGH": "🔴"}.get(signal['risk_level'], "⚪")
+        # Enhanced risk level display
+        risk_emojis = {
+            "LOW": "🟢🛡️ LOW RISK 🛡️🟢", 
+            "MEDIUM": "🟡⚠️ MEDIUM RISK ⚠️🟡", 
+            "HIGH": "🔴🚨 HIGH RISK 🚨🔴"
+        }
+        risk_display = risk_emojis.get(signal['risk_level'], "⚪ UNKNOWN RISK")
         
-        # Confidence bar
+        # Enhanced confidence bar with colors
         confidence = signal['confidence']
+        if confidence >= 80:
+            confidence_color = "🟢"
+            confidence_desc = "VERY HIGH"
+        elif confidence >= 70:
+            confidence_color = "🟡"
+            confidence_desc = "HIGH"
+        elif confidence >= 60:
+            confidence_color = "🟠"
+            confidence_desc = "MEDIUM"
+        else:
+            confidence_color = "🔴"
+            confidence_desc = "LOW"
+            
         confidence_bar = "█" * int(confidence / 10) + "░" * (10 - int(confidence / 10))
         
         signal_message = f"""
-🤖 **AI TRADING SIGNAL** 🎯
+🎯 **AI TRADING SIGNAL** 🎯
+{'='*30}
 
-💱 **Pair:** {signal['pair']}
-{action_text}
+{action_header}
+{direction_banner}
 
-📈 **Entry Price:** ${signal['entry_price']:.5f}
-⏰ **Expiration:** {signal['expiration_minutes']} minutes
-🎯 **Confidence:** {confidence}% 
-{confidence_bar}
+💱 **PAIR:** `{signal['pair']}`
+{action_text} {action_emoji}
 
-⚠️ **Risk Level:** {risk_emoji} {signal['risk_level']}
+💰 **Entry Price:** `${signal['entry_price']:.5f}`
+⏰ **Expiration:** `{signal['expiration_minutes']} minutes`
 
-📊 **Analysis:**
-{signal['analysis']}
+{confidence_color} **Confidence:** {confidence}% ({confidence_desc})
+`{confidence_bar}`
+
+⚠️ **Risk Level:** {risk_display}
+
+📊 **AI Analysis:**
+_{signal['analysis']}_
 
 🕒 **Generated:** {signal['timestamp']}
-
-*⚡ Trade responsibly | This is not financial advice*
+{'='*30}
+*⚡ Trade wisely | Not financial advice*
         """
         
         # Add inline keyboard for quick actions

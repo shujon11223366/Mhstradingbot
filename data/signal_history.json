@@ -50,8 +50,25 @@
       "actual_result": null,
       "profit_loss": null,
       "closed_at": null
+    },
+    {
+      "signal_id": "EUR/USD_1753944131",
+      "pair": "EUR/USD",
+      "direction": "PUT",
+      "entry_price": 1.1500140468355526,
+      "current_price": 1.15,
+      "expiration_minutes": 1,
+      "confidence": 71.5,
+      "risk_level": "LOW",
+      "analysis": "Short-term 1min scalping opportunity. Stable momentum for precise entry. Consolidation breakout pattern forming. Momentum indicators show bearish acceleration. AI confidence: 71.5%",
+      "timestamp": "2025-07-31 06:42:11 UTC",
+      "model_type": "medium_term",
+      "outcome": null,
+      "actual_result": null,
+      "profit_loss": null,
+      "closed_at": null
     }
   ],
-  "last_updated": "2025-07-31T06:37:45.822738",
-  "total_count": 3
+  "last_updated": "2025-07-31T06:42:11.218262",
+  "total_count": 4
 }
