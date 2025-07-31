@@ -1,0 +1,40 @@
+{
+  "signals": [
+    {
+      "signal_id": "GBP/JPY_1753943281",
+      "pair": "GBP/JPY",
+      "direction": "CALL",
+      "entry_price": 197.96223368292658,
+      "current_price": 197.95,
+      "expiration_minutes": 15,
+      "confidence": 88.5,
+      "risk_level": "LOW",
+      "analysis": "Market showing consolidation pattern. Low volatility indicates stable price action. Bullish divergence in momentum indicators. AI confidence: 88.5%",
+      "timestamp": "2025-07-31 06:28:01 UTC",
+      "model_type": "medium_term",
+      "outcome": null,
+      "actual_result": null,
+      "profit_loss": null,
+      "closed_at": null
+    },
+    {
+      "signal_id": "USD/JPY_1753943324",
+      "pair": "USD/JPY",
+      "direction": "CALL",
+      "entry_price": 148.98612492901157,
+      "current_price": 149,
+      "expiration_minutes": 18,
+      "confidence": 87.6,
+      "risk_level": "LOW",
+      "analysis": "Market showing consolidation pattern. Low volatility indicates stable price action. Support levels holding strong, expecting bounce. AI confidence: 87.6%",
+      "timestamp": "2025-07-31 06:28:44 UTC",
+      "model_type": "medium_term",
+      "outcome": null,
+      "actual_result": null,
+      "profit_loss": null,
+      "closed_at": null
+    }
+  ],
+  "last_updated": "2025-07-31T06:28:44.809846",
+  "total_count": 2
+}

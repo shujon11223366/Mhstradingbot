@@ -104,8 +104,8 @@ Use /signal to get your first AI-generated signal!
 **🎯 Main Commands:**
 
 /signal - Generate instant AI trading signal
-• Get real-time market analysis
-• Receive entry point recommendations
+• Get clear BUY or SELL recommendations
+• Receive optimal entry point prices
 • View risk assessment and expiration times
 
 /pairs - View supported currency pairs
@@ -114,7 +114,7 @@ Use /signal to get your first AI-generated signal!
 • Get pair-specific recommendations
 
 /subscribe - Enable automatic signals
-• Receive signals every 5-15 minutes
+• Receive BUY/SELL signals every 5-15 minutes
 • Get notifications for high-probability trades
 • 24/7 automated signal delivery
 
@@ -127,7 +127,7 @@ Use /signal to get your first AI-generated signal!
 1. Our AI analyzes real-time market data
 2. Machine learning models predict price movements
 3. Risk assessment evaluates trade quality
-4. You receive clear buy/sell signals
+4. You receive clear BUY/SELL signals with entry prices
 
 **⚠️ Disclaimer:**
 Trading involves risk. This bot provides educational signals only.
@@ -246,9 +246,15 @@ Use /unsubscribe to stop auto signals anytime.
 
     async def send_formatted_signal(self, chat_id, signal, context):
         """Send a beautifully formatted trading signal"""
-        # Determine signal emoji and color
-        direction_emoji = "🟢" if signal['direction'] == 'CALL' else "🔴"
-        direction_text = f"{direction_emoji} **{signal['direction']}**"
+        # Convert CALL/PUT to BUY/SELL terminology
+        if signal['direction'] == 'CALL':
+            direction_emoji = "🟢"
+            direction_text = f"{direction_emoji} **BUY** (CALL)"
+            action_text = "📈 **Action:** BUY"
+        else:
+            direction_emoji = "🔴"
+            direction_text = f"{direction_emoji} **SELL** (PUT)"
+            action_text = "📉 **Action:** SELL"
         
         # Risk level emoji
         risk_emoji = {"LOW": "🟢", "MEDIUM": "🟡", "HIGH": "🔴"}.get(signal['risk_level'], "⚪")
@@ -261,7 +267,7 @@ Use /unsubscribe to stop auto signals anytime.
 🤖 **AI TRADING SIGNAL** 🎯
 
 💱 **Pair:** {signal['pair']}
-{direction_text}
+{action_text}
 
 📈 **Entry Price:** ${signal['entry_price']:.5f}
 ⏰ **Expiration:** {signal['expiration_minutes']} minutes
