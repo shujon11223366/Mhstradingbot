@@ -58,7 +58,7 @@ async def main():
         logging.info("🤖 Automated signal generation started")
         
         # Check if Telegram bot token is configured
-        if Config.TELEGRAM_BOT_TOKEN == '8045125371:AAHyV8-uE9QL6MCPy1pQv_l8rkU2OM90lEU':
+        if Config.TELEGRAM_BOT_TOKEN == 'YOUR_BOT_TOKEN_HERE':
             logging.warning("⚠️  Telegram bot token not configured. Web dashboard will run without Telegram bot.")
             logging.info("💻 Access the web dashboard at http://localhost:5000")
             logging.info("🔑 To enable Telegram bot, please set TELEGRAM_BOT_TOKEN environment variable")
